@@ -4,6 +4,9 @@
 //! start occurs in the turbopump, this loop bypasses the brain entirely.
 //! It cuts the fuel and triggers the ejection sequence in microseconds.
 //! It does not ask for permission.
+//!
+//! References: [Ref 7] (fault-tolerant tracking, prescribed error bounds),
+//! [Ref 14] (DTIC stability and control of hypersonic vehicles)
 
 pub mod interrupt;
 pub mod ejection;

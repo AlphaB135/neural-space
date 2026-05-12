@@ -2,6 +2,8 @@
 //!
 //! Reads surface thermocouple arrays across the vehicle skin.
 //! At Mach 32, skin temp can exceed 10,000 degrees in milliseconds.
+//!
+//! References: [Ref 10] (TPS review), [Ref 12] (boundary layer transition control)
 
 use super::SensorSample;
 
@@ -18,6 +20,10 @@ pub enum ThermalZone {
 }
 
 /// Thermal limits per zone in Kelvin.
+///
+/// Approximate material limits for C/C composite and reinforced carbon-carbon (RCC).
+/// Actual limits depend on material, exposure duration, and manufacturing process.
+/// See [Ref 10] for detailed TPS material properties.
 pub const THERMAL_LIMITS: [f64; 7] = [
     11_000.0, // NoseCone — takes the brunt
     8_500.0,  // ForebodyUpper
@@ -34,7 +40,8 @@ pub fn is_exceeded(sample: &SensorSample, zone: ThermalZone) -> bool {
     sample.value >= THERMAL_LIMITS[zone as usize]
 }
 
-/// Thermal gradient between two zones — rapid change indicates boundary layer collapse.
+/// Thermal gradient between two zones — rapid change indicates boundary layer transition.
+/// Mack second mode instability causes localized heating spikes during transition [Ref 11].
 #[inline(always)]
 pub fn thermal_gradient(a: &SensorSample, b: &SensorSample) -> f64 {
     let dt = (a.timestamp as f64) - (b.timestamp as f64);

@@ -3,6 +3,9 @@
 //! Hypersonic flight creates extreme pressure differentials.
 //! Stagnation pressure behind the bow shock is the primary indicator
 //! of boundary layer health.
+//!
+//! References: [Ref 3] (Anderson, hypersonic gas dynamics),
+//! [Ref 1] (Billig, shock shape correlations)
 
 use super::SensorSample;
 

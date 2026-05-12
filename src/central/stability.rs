@@ -2,8 +2,16 @@
 //!
 //! Maintains vehicle orientation within tight tolerances despite
 //! aerodynamic disturbances at hypersonic speeds.
+//!
+//! References: [Ref 5, 8, 13] — deterministic learning control,
+//! control-oriented modeling, flight dynamics survey.
 
-/// PID gains for attitude control — tuned for Mach 20-32 regime.
+/// PID gains for attitude control.
+///
+/// Note: placeholder values. Real gain scheduling across Mach regimes
+/// requires wind tunnel data or CFD-derived aerodynamic coefficients.
+/// See [Ref 8] (Parker et al., 2007) for control-oriented model structure
+/// and [Ref 5] (Dong et al., 2022) for deterministic learning approach.
 pub struct PidGains {
     pub kp: f64,
     pub ki: f64,
