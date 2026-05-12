@@ -3,6 +3,8 @@
 //! Fixed-size, stack-allocated matrix types. No heap. No dynamic dispatch.
 //! Every operation completes in bounded time.
 
+use libm::sqrt;
+
 /// 3x3 matrix — used for rotation transforms.
 #[repr(C, align(32))]
 pub struct Mat3 {
@@ -47,7 +49,7 @@ impl Vec3 {
 
     #[inline(always)]
     pub fn magnitude(&self) -> f64 {
-        self.dot(self).sqrt()
+        sqrt(self.dot(self))
     }
 
     #[inline(always)]

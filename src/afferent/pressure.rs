@@ -8,6 +8,7 @@
 //! [Ref 1] (Billig, shock shape correlations)
 
 use super::SensorSample;
+use libm::sqrt;
 
 /// Pressure reading types.
 #[repr(u8)]
@@ -34,5 +35,5 @@ pub fn dynamic_pressure(stagnation: &SensorSample, static_p: &SensorSample) -> f
 pub fn estimate_mach(stagnation: &SensorSample, static_p: &SensorSample) -> f64 {
     let ratio = stagnation.value / static_p.value;
     // Simplified isentropic relation for hypersonic regime
-    ((ratio - 1.0) * 5.0 / 7.0).max(0.0).sqrt() * 2.236 // approximate
+    sqrt((ratio - 1.0) * 5.0 / 7.0).max(0.0) * 2.236 // approximate
 }

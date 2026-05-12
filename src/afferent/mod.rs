@@ -9,6 +9,7 @@ pub mod strain;
 
 /// Raw sensor sample — single atomic reading from the metal.
 #[repr(C, align(16))]
+#[derive(Copy, Clone)]
 pub struct SensorSample {
     pub timestamp: u64,
     pub channel: u8,

@@ -8,6 +8,7 @@ pub mod surfaces;
 
 /// Efferent command — one atomic actuation instruction.
 #[repr(C, align(8))]
+#[derive(Copy, Clone)]
 pub struct EfferentCommand {
     pub target: u16,
     pub value: f64,

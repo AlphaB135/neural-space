@@ -5,6 +5,7 @@ edition = "2024"
 description = "Deterministic autonomic nervous system for hypersonic aerospace vehicles"
 
 [dependencies]
+libm = "0.2"
 
 [profile.release]
 opt-level = 3

@@ -7,6 +7,7 @@
 pub mod stability;
 pub mod propulsion;
 pub mod matrix;
+pub mod realgas;
 
 /// Central processing tick — one complete control cycle.
 pub const CONTROL_CYCLE_NS: u64 = 100; // 100ns target cycle time
@@ -22,6 +23,7 @@ pub struct VehicleState {
     pub mach: f64,
     pub dynamic_pressure: f64,     // Pa
     pub skin_temp_max: f64,        // K
+    pub freestream_temp: f64,      // K — for real gas γ_eff calculation
     pub elapsed_ns: u64,
 }
 
@@ -53,6 +55,7 @@ impl CentralProcessor {
                 mach: 0.0,
                 dynamic_pressure: 0.0,
                 skin_temp_max: 0.0,
+                freestream_temp: 220.0, // K — standard atmosphere at ~25km
                 elapsed_ns: 0,
             },
             output: ControlOutput {
@@ -81,6 +84,7 @@ impl CentralProcessor {
             self.state.mach,
             self.state.dynamic_pressure,
             self.state.skin_temp_max,
+            self.state.freestream_temp,
             &mut self.output.thrust_vector,
             &mut self.output.throttle,
             &mut self.output.fuel_mixture,
