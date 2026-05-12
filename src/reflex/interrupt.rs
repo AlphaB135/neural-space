@@ -21,8 +21,17 @@ pub const IRQ_WATCHDOG: u16 = 0x1F;
 pub const REFLEX_DEADLINE_NS: u64 = 500; // 500 nanoseconds
 
 /// Acknowledge interrupt — write to interrupt controller.
+///
+/// # Safety
+/// This function writes to hardware MMIO registers.
+/// Callers must ensure the register address is valid.
 #[inline(always)]
 pub unsafe fn acknowledge(irq: u16) {
     let _ = irq;
-    // Write to GIC distributor register
+    // TODO: Write to GIC (Generic Interrupt Controller) distributor
+    // register to clear the pending interrupt.
+    //
+    // Example for ARMv8 GIC:
+    // let gicd_icpendr = 0x08000000 as *mut u32; // GICD_ICPENDR0
+    // gicd_icpendr.write_volatile(1 << (irq % 32));
 }
