@@ -9,6 +9,8 @@ pub mod propulsion;
 pub mod matrix;
 pub mod realgas;
 
+use stability::{PidState, PidGains, Quaternion};
+
 /// Central processing tick — one complete control cycle.
 pub const CONTROL_CYCLE_NS: u64 = 100; // 100ns target cycle time
 
@@ -17,7 +19,7 @@ pub const CONTROL_CYCLE_NS: u64 = 100; // 100ns target cycle time
 pub struct VehicleState {
     pub position: [f64; 3],        // ECI frame, meters
     pub velocity: [f64; 3],        // m/s
-    pub attitude: [f64; 4],        // quaternion
+    pub attitude: [f64; 4],        // quaternion [w, x, y, z]
     pub angular_rate: [f64; 3],    // rad/s
     pub mass: f64,                 // kg (changes as fuel burns)
     pub mach: f64,
@@ -41,6 +43,9 @@ pub struct ControlOutput {
 pub struct CentralProcessor {
     state: VehicleState,
     output: ControlOutput,
+    pid_state: PidState,           // PID integral state
+    pid_gains: PidGains,           // PID gains
+    target_attitude: Quaternion,   // Desired attitude
 }
 
 impl CentralProcessor {
@@ -65,19 +70,48 @@ impl CentralProcessor {
                 surface_deflections: [0.0; 6],
                 cycle_time_ns: 0,
             },
+            pid_state: PidState {
+                integral: [0.0; 3],
+            },
+            pid_gains: PidGains {
+                kp: 12.0,
+                ki: 0.8,
+                kd: 4.5,
+            },
+            target_attitude: [1.0, 0.0, 0.0, 0.0], // Identity (no rotation)
         }
+    }
+
+    /// Set target attitude — external guidance system calls this.
+    pub fn set_target_attitude(&mut self, target: Quaternion) {
+        self.target_attitude = target;
+    }
+
+    /// Set PID gains — for gain scheduling or tuning.
+    pub fn set_pid_gains(&mut self, gains: PidGains) {
+        self.pid_gains = gains;
+    }
+
+    /// Reset PID integral state — call after mode change or large maneuver.
+    pub fn reset_pid_state(&mut self) {
+        self.pid_state.reset();
     }
 
     /// Process one control cycle — strictly bounded execution time.
     pub fn process(&mut self, state: VehicleState) -> &ControlOutput {
         self.state = state;
 
-        // Stability computation
-        stability::compute_attitude_correction(
+        // Stability computation — quaternion-based PID
+        let dt = CONTROL_CYCLE_NS as f64 * 1e-9; // ns → seconds
+        let surfaces = stability::compute_attitude_correction(
             &self.state.attitude,
+            &self.target_attitude,
             &self.state.angular_rate,
-            &mut self.output.surface_deflections,
+            &self.pid_gains,
+            &mut self.pid_state,
+            dt,
         );
+        self.output.surface_deflections.copy_from_slice(&surfaces);
 
         // Propulsion computation
         propulsion::compute_thrust_profile(
